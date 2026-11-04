@@ -1,0 +1,4 @@
+# Load under the authenticator: conjur policy load -b conjur/authn-iam/${SERVICE_ID} -f authenticator-grant.yml
+- !grant
+  role: !group apps
+  member: !host /data/${POLICY_ID}/${AWS_ACCOUNT_ID}/${ROLE_NAME}

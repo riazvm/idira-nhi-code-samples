@@ -1,0 +1,9 @@
+.DS_Store
+target/
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+config.env
+.rendered/
+response.json
