@@ -7,6 +7,7 @@ import com.cyberark.conjur.api.Token;
 import com.cyberark.conjur.api.clients.AWSIAMAuthenticator;
 import jakarta.ws.rs.client.ClientBuilder;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -29,14 +30,18 @@ public class SecretHandler implements RequestHandler<Map<String, Object>, Map<St
         }
 
         String secretId = requireEnv("SECRET_ID");
-        String secret = new Conjur(cachedToken).variables().retrieveSecret(secretId);
-
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("secretId", secretId);
-        response.put("secretLength", secret.length());
-        response.put("tokenReused", tokenReused);
-        response.put("tokenExpires", cachedToken.getExpiration().toString());
-        return response;
+        byte[] secret = new Conjur(cachedToken).variables().retrieveSecretBytes(secretId);
+        try {
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("secretId", secretId);
+            response.put("secretLength", secret.length);
+            response.put("tokenReused", tokenReused);
+            response.put("tokenExpires", cachedToken.getExpiration().toString());
+            return response;
+        } finally {
+            // Clear the value as soon as it's no longer needed. A String couldn't be cleared this way.
+            Arrays.fill(secret, (byte) 0);
+        }
     }
 
     private static Token authenticate() {
