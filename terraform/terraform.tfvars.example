@@ -1,0 +1,24 @@
+# Copy to terraform.tfvars and fill in. See README.md, Step 4.
+# The client secret is not set here. Export it instead:
+#   export TF_VAR_cyberark_client_secret='<service user password>'
+
+cyberark_tenant    = "abc1234"                               # from https://<tenant>.id.cyberark.cloud, lowercase
+cyberark_domain    = "mycompany"                             # from https://<subdomain>.secretshub.cyberark.cloud
+cyberark_client_id = "svc-tf-secretshub@cyberark.cloud.1234" # service user, with suffix
+
+# One entry per policy. The key becomes the policy name in Secrets Hub.
+sync_policies = {
+  finance_aws = {
+    description = "Finance Safe to AWS"
+    source_id   = "store-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" # PAM_PCLOUD store
+    target_id   = "store-yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy" # AWS Secrets Manager or Azure Key Vault store
+    safe_name   = "FINANCE_SAFE"
+  }
+
+  hr_aws = {
+    description = "HR Safe to AWS"
+    source_id   = "store-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    target_id   = "store-yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+    safe_name   = "HR_SAFE"
+  }
+}

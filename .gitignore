@@ -7,3 +7,4 @@ target/
 config.env
 .rendered/
 response.json
+terraform.tfvars
