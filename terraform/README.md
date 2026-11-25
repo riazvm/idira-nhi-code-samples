@@ -139,7 +139,7 @@ The provider cannot update a policy in place. To change a policy, replace it: Te
    terraform apply -replace='cyberark_sync_policy.this["finance_aws"]'
    ```
 
-3. Check the plan before you type `yes`. It must show `-/+ ... must be replaced` and `1 to add, 0 to change, 1 to destroy`, for that policy only.
+3. Check the plan before you type `yes`. It must show `will be replaced, as requested` and `1 to add, 0 to change, 1 to destroy`, for that policy only.
 4. Run `terraform plan`. Expected: `No changes.`
 
 Do not run a plain `terraform apply` after editing an entry. Terraform plans an in-place update, and the apply fails with `Updating the sync policy is not supported through terraform`.
