@@ -85,7 +85,7 @@ sync_policies = {
 }
 ```
 
-The map key (`finance_aws`) becomes the policy name in Secrets Hub. Use a key that is unique and that you will not need to rename.
+The map key (`finance_aws`) becomes the policy name in Secrets Hub. Each key must be unique. Renaming a key deletes that policy and creates a new one with the new name.
 
 `terraform.tfvars` is excluded from Git. Do not commit it.
 
@@ -125,8 +125,28 @@ You can also open the policy in the Secrets Hub UI and check that the transforma
 |---|---|
 | **Add** a policy | Add an entry to `sync_policies`, then run `terraform apply`. Only the new policy is created. |
 | **Remove** a policy | Delete its entry, then run `terraform apply`. Only that policy is deleted. |
-| **Change** a policy | Rename its key, then run `terraform apply`. Terraform deletes the old policy and creates the new one. The provider cannot update a policy in place, so editing an entry without renaming its key fails. |
+| **Change** a policy | Follow [Changing a policy](#changing-a-policy). |
 | **Remove all** policies | Run `terraform destroy`. |
+
+### Changing a policy
+
+The provider cannot update a policy in place. To change a policy, replace it: Terraform deletes the policy and creates it again with the new values.
+
+1. Edit the policy's entry in `terraform.tfvars`, for example `safe_name` or `description`. Keep the same key.
+2. Run the apply with `-replace`, using the policy's key:
+
+   ```bash
+   terraform apply -replace='cyberark_sync_policy.this["finance_aws"]'
+   ```
+
+3. Check the plan before you type `yes`. It must show `-/+ ... must be replaced` and `1 to add, 0 to change, 1 to destroy`, for that policy only.
+4. Run `terraform plan`. Expected: `No changes.`
+
+Do not run a plain `terraform apply` after editing an entry. Terraform plans an in-place update, and the apply fails with `Updating the sync policy is not supported through terraform`.
+
+Syncing for that Safe stops for a few seconds between the delete and the create. Secrets already in the target store are not removed.
+
+To replace several policies, repeat `-replace` once per policy in the same command.
 
 ### Adopting a policy that is already in Terraform state
 
@@ -156,7 +176,7 @@ This project pins `cyberark/cyberark` to **0.3.10**. Do not use 0.3.9: it crashe
 | `HTTP 403` from Secrets Hub | The service user is not in the Secrets Hub Admin role | Add the user to the role (see Before you start, item 2). |
 | `PLCY00036E ... does not support plaintext passwords` | The target store type does not support plaintext passwords | Use an AWS Secrets Manager or Azure Key Vault target. |
 | `Sync policy filter not ready` | Secrets Hub has not finished creating the policy | Wait one minute and run the command again. |
-| `Updating the sync policy is not supported through terraform` | An existing entry was edited, or the `ignore_changes` workaround was removed | Undo the edit, or rename the key to replace the policy. Restore `ignore_changes` if it was removed. |
+| `Updating the sync policy is not supported through terraform` | An existing entry was edited and applied without `-replace`, or the `ignore_changes` workaround was removed | Rerun the apply with `-replace` (see [Changing a policy](#changing-a-policy)). Restore `ignore_changes` if it was removed. |
 | `Invalid Transformation Value` | `transformation` was changed to use `each.value` | Restore the literal `"password_only_plain_text"` in `main.tf`. |
 | Terraform prompts `var.cyberark_client_secret` | The secret is not exported in this shell | Press Ctrl+C, run Step 2, then rerun the command. |
 | Terraform prompts for `cyberark_tenant` or another value | `terraform.tfvars` is missing, or you are in the wrong directory | Run Terraform from this directory and complete Step 4. |
