@@ -115,7 +115,7 @@ For each policy ID, confirm that the transformation is set:
 curl -s -H "Authorization: Bearer $TOKEN" "https://<subdomain>.secretshub.cyberark.cloud/api/policies/<policy id>?projection=REGULAR" | jq '{name, transformation}'
 ```
 
-Expected: `"transformation": { "predefined": "password_only_plain_text" }`.
+Expected: a transformation ID that starts with `trns-password-only-plaintext-`, for example `"transformation": { "id": "trns-password-only-plaintext-aws-pam-pcloud" }`. A policy without this transformation shows a different ID.
 
 You can also open the policy in the Secrets Hub UI and check that the transformation is **Password only, plain text**.
 
